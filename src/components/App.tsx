@@ -101,6 +101,7 @@ const App = (): JSX.Element => {
       className={`llwp-map ${classes.container}`}
       style={{
         height: '100vh',
+        zIndex: 0,
       }}
       data-leaflet="{ 'name': 'Web Mercator', 'projection': 3857, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': false, 'labeled': true }, 'layers': [] } "
     ></div>

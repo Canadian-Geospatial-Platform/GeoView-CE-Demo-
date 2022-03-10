@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Climate Engine Demo</title>
+
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .llwp-map {
+        height: 100vh;
+        width: 100%;
+        border: 1px solid black;
+      }
+    </style>
+
+    <script src="https://yass0016.github.io/GeoView/gcpv-main.js"></script>
+  </head>
+  <body>
+    <div
+      id="mapWM"
+      class="llwp-map"
+      data-leaflet="{ 'name': 'LCC', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': false, 'labeled': true }, 'layers': [] }"
+    ></div>
+
+    <script src="config.js"></script>
+
+    <script>
+      if (cgpv) {
+        cgpv.init(function () {
+          console.log(config);
+        });
+      }
+    </script>
+  </body>
+</html>

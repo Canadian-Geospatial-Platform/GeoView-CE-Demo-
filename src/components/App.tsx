@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, createContext, useState, useMemo } from 'react';
 
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -71,7 +71,7 @@ const App = (): JSX.Element => {
         id: 'testPanelButton',
         tooltip: translations[language].custom.panelTitle,
         tooltipPlacement: 'right',
-        icon: '<i class="material-icons">details</i>',
+        icon: '<i class="material-icons">map</i>',
         visible: true,
         type: 'icon',
       };
@@ -79,7 +79,7 @@ const App = (): JSX.Element => {
       // panel props
       const panel = {
         title: translations[language].custom.panelTitle,
-        icon: '<i class="material-icons">details</i>',
+        icon: '<i class="material-icons">map</i>',
         width: 300,
       };
 

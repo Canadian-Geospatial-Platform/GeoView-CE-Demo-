@@ -1,3 +1,6 @@
+import { Login } from './Login';
+import { ClimateEngine } from './ClimateEngine';
+
 /**
  * Panel Content Properties
  */
@@ -10,6 +13,13 @@ const w = window as any;
 
 const cgpv = w['cgpv'];
 
+const { react } = cgpv;
+
+const { createContext } = react;
+
+// context used to store and manage state
+export const StateContext = createContext({});
+
 /**
  * Create a new panel content
  *
@@ -17,14 +27,71 @@ const cgpv = w['cgpv'];
  * @returns {JSX.Element} the new create panel content
  */
 export const PanelContent = (props: PanelContentProps): JSX.Element => {
-  const { buttonPanel } = props;
-  const { ui } = cgpv;
+  const { buttonPanel, mapId } = props;
 
-  const { Button } = ui.elements;
+  const { ui, mui, react } = cgpv;
+
+  const { useState, useEffect, useMemo } = react;
+
+  const [apiKey, setApiKey] = useState();
+
+  const auth = useMemo(() => {
+    return { apiKey, setApiKey };
+  }, [apiKey]);
+
+  /**
+   * Save API key in local storage and login user
+   *
+   * @param {string} key the api key to store
+   */
+  const saveApiKey = (key: string): void => {
+    localStorage.setItem('key', key);
+
+    console.log('test');
+
+    auth.setApiKey(key);
+  };
+
+  /**
+   * Get the API key from local storage
+   */
+  const getApiKey = (): void => {
+    const key = localStorage.getItem('key');
+
+    if (key) {
+      auth.setApiKey(key);
+    }
+  };
+
+  /**
+   * Delete the API key from local storage
+   */
+  const deleteApiKey = (): void => {
+    localStorage.removeItem('key');
+
+    auth.setApiKey(null);
+  };
+
+  useEffect(() => {
+    getApiKey();
+  }, []);
 
   return (
-    <div>
-      <div>Test content</div>
-    </div>
+    <StateContext.Provider
+      value={{
+        auth,
+        mapId,
+      }}
+    >
+      {!auth.apiKey ? (
+        <Login saveApiKey={saveApiKey} />
+      ) : (
+        <ClimateEngine
+          deleteApiKey={deleteApiKey}
+          mapId={mapId}
+          buttonPanel={buttonPanel}
+        />
+      )}
+    </StateContext.Provider>
   );
 };

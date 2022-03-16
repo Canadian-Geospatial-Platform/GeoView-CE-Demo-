@@ -1,7 +1,6 @@
 import { StateContext } from './PanelContent';
 
-import { httpGet } from '../utils/api';
-import { End_Points } from '../utils/end_points';
+import { API } from '../utils/api';
 
 // get reference to window object
 const w = window as any;
@@ -26,19 +25,12 @@ const useStyles = makeStyles((theme: any) => ({
 }));
 
 /**
- * Login properties
- */
-interface LoginProps {
-  saveApiKey: (key: string) => void;
-}
-
-/**
  * Create a login component to save the API key
  *
  * @param {LoginProps} props properties passed to the login component
  * @returns {JSX.Element} a login component
  */
-export const Login = (props: LoginProps): JSX.Element => {
+export const Login = (): JSX.Element => {
   const { ui, mui, react, api } = cgpv;
 
   const { createRef, useContext } = react;
@@ -56,12 +48,9 @@ export const Login = (props: LoginProps): JSX.Element => {
   /**
    * Login function
    */
-  const login = async () => {
+  const login = () => {
     // request the validate end point to check if token is valid
-    let res = await httpGet(
-      End_Points.VALIDATE_KEY,
-      textFieldRef.current.value,
-    );
+    let res = API.validateToken(textFieldRef.current.value) as any;
 
     if (res.detail) {
       api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
@@ -72,7 +61,7 @@ export const Login = (props: LoginProps): JSX.Element => {
         },
       });
     } else {
-      props.saveApiKey(textFieldRef.current.value);
+      state.auth.saveApiKey(textFieldRef.current.value);
     }
   };
 
@@ -89,6 +78,7 @@ export const Login = (props: LoginProps): JSX.Element => {
         tooltip="Login"
         tooltipPlacement="right"
         className={classes.loginBtn}
+        variant="contained"
         type="text"
         onClick={() => login()}
       >

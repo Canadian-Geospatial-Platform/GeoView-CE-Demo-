@@ -1,14 +1,6 @@
 import { Login } from './Login';
 import { ClimateEngine } from './ClimateEngine';
 
-/**
- * Panel Content Properties
- */
-interface PanelContentProps {
-  mapId: string;
-  buttonPanel: any;
-}
-
 const w = window as any;
 
 const cgpv = w['cgpv'];
@@ -19,6 +11,14 @@ const { createContext } = react;
 
 // context used to store and manage state
 export const StateContext = createContext({});
+
+/**
+ * Panel Content Properties
+ */
+interface PanelContentProps {
+  mapId: string;
+  buttonPanel: any;
+}
 
 /**
  * Create a new panel content
@@ -35,10 +35,6 @@ export const PanelContent = (props: PanelContentProps): JSX.Element => {
 
   const [apiKey, setApiKey] = useState();
 
-  const auth = useMemo(() => {
-    return { apiKey, setApiKey };
-  }, [apiKey]);
-
   /**
    * Save API key in local storage and login user
    *
@@ -46,8 +42,6 @@ export const PanelContent = (props: PanelContentProps): JSX.Element => {
    */
   const saveApiKey = (key: string): void => {
     localStorage.setItem('key', key);
-
-    console.log('test');
 
     auth.setApiKey(key);
   };
@@ -76,22 +70,22 @@ export const PanelContent = (props: PanelContentProps): JSX.Element => {
     getApiKey();
   }, []);
 
+  /**
+   * Create auth state
+   */
+  const auth = useMemo(() => {
+    return { apiKey, setApiKey, saveApiKey, deleteApiKey, getApiKey };
+  }, [apiKey]);
+
   return (
     <StateContext.Provider
       value={{
         auth,
         mapId,
+        buttonPanel,
       }}
     >
-      {!auth.apiKey ? (
-        <Login saveApiKey={saveApiKey} />
-      ) : (
-        <ClimateEngine
-          deleteApiKey={deleteApiKey}
-          mapId={mapId}
-          buttonPanel={buttonPanel}
-        />
-      )}
+      {!auth.apiKey ? <Login /> : <ClimateEngine />}
     </StateContext.Provider>
   );
 };

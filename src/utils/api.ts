@@ -84,7 +84,6 @@ export class API {
     endDate: string,
     apiKey: string,
   ): Promise<Object> => {
-    console.log(startDate);
     const result = await httpGet(
       `${End_Points.TIMESERIES_POINTS}/points?dataset=${dataset}&variable=${variable}&area_reducer=mean&start_date=${startDate}&end_date=${endDate}&coordinates=[[${lng},${lat}]]`,
       apiKey,

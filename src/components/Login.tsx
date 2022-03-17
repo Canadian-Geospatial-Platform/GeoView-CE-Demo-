@@ -48,9 +48,9 @@ export const Login = (): JSX.Element => {
   /**
    * Login function
    */
-  const login = () => {
+  const login = async () => {
     // request the validate end point to check if token is valid
-    let res = API.validateToken(textFieldRef.current.value) as any;
+    let res = (await API.validateToken(textFieldRef.current.value)) as any;
 
     if (res.detail) {
       api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {

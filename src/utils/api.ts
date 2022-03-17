@@ -13,7 +13,7 @@ export class API {
    * @returns {Object} an object containing with success/fail message
    */
   static validateToken = async (token: string): Promise<Object> => {
-    const result = httpGet(End_Points.VALIDATE_KEY, token);
+    const result = await httpGet(End_Points.VALIDATE_KEY, token);
 
     return result;
   };

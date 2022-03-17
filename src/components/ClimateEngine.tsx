@@ -1,3 +1,5 @@
+import Chart from 'chart.js/auto';
+
 import { API } from '../utils/api';
 import { StateContext } from './PanelContent';
 
@@ -47,6 +49,8 @@ export const ClimateEngine = (): JSX.Element => {
 
   const classes = useStyles();
 
+  const map = api.map(mapId).map;
+
   /**
    * Load the map layer for the selected date range on selected dataset and variable
    */
@@ -64,40 +68,6 @@ export const ClimateEngine = (): JSX.Element => {
     if (!result.details) {
       const basemapUrl = result.tile_fetcher;
 
-      // const basemap = {
-      //   id: result['map_id'],
-      //   name: 'Dataset from ' + startDate + ' to ' + endDate,
-      //   type: 'transport',
-      //   description: '',
-      //   descSummary: '',
-      //   altText: '',
-      //   thumbnailUrl: '',
-      //   layers: [
-      //     {
-      //       id: 'transport',
-      //       type: 'transport',
-      //       url: basemapUrl,
-      //       opacity: result.colormap_options.opacity,
-      //       basemapPaneName: 'transport',
-      //       options: {
-      //         tms: false,
-      //         tileSize: 1,
-      //         noWrap: false,
-      //         attribution: false,
-      //       },
-      //     },
-      //   ],
-      //   attribution: '',
-      //   zoomLevels: {
-      //     min: result.colormap_options.min,
-      //     max: result.colormap_options.max,
-      //   },
-      // };
-
-      // api.map(mapId).basemap.createBasemap(basemap);
-
-      // api.map(mapId).basemap.setBasemap(result['map_id']);
-
       tileLayer(basemapUrl).addTo(api.map(mapId).map);
 
       buttonPanel.panel.close();
@@ -108,7 +78,7 @@ export const ClimateEngine = (): JSX.Element => {
   /**
    * Get the date range for selected dataset
    */
-  const getDateRange = useCallback(async () => {
+  const getDateRange = async () => {
     // get supported date range for time series
     const dateRange = (await API.getTimePeriodRange(dataset, apiKey)) as any;
 
@@ -119,14 +89,7 @@ export const ClimateEngine = (): JSX.Element => {
       setStartDate(dateRange.max);
       setEndDate(dateRange.max);
     }
-
-    if (startDate && endDate) {
-      setLoaded(true);
-      api.map(mapId).removeComponent('loadingIndicator');
-
-      loadMapLayer();
-    }
-  }, [startDate, endDate]);
+  };
 
   /**
    * Get time series for selected date range on selected dataset and variable
@@ -155,34 +118,67 @@ export const ClimateEngine = (): JSX.Element => {
         },
       });
     } else {
-      let values = [];
+      let labels: string[] = [];
+      let data: number[] = [];
+
       for (var i = 0; i < result[0].length; i++) {
         let value = result[0][i].NDVI;
 
         if (value === -9999) value = 0;
 
-        values.push([result[0][i].Date, value]);
+        labels.push(result[0][i].Date);
+        data.push(value);
       }
 
-      console.log(values);
+      const chartData = {
+        labels: labels,
+        datasets: [
+          {
+            label: variable,
+            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            data,
+          },
+        ],
+      };
+
+      const config = {
+        type: 'line',
+        data: chartData,
+        options: {},
+      };
+
+      const chartButtonPanel =
+        api.map(mapId).navBarButtons.buttons['charts']['chartModal'];
+
+      const chartElement = document.getElementById('chartContainer');
+
+      if (chartElement) {
+        chartElement.outerHTML = '<canvas id="chartContainer"></canvas>';
+      }
+
+      chartButtonPanel.panel.changeContent(
+        <canvas id="chartContainer"></canvas>,
+      );
+
+      const chart = new Chart(
+        document.getElementById('chartContainer') as HTMLCanvasElement,
+        config as any,
+      );
+
+      chartButtonPanel.panel.open();
     }
   };
 
   useEffect(() => {
-    createProcessProgressModal();
-  }, []);
+    if (startDate.length && endDate.length && !loaded) {
+      setLoaded(true);
+      api.map(mapId).removeComponent('loadingIndicator');
 
-  useEffect(() => {
-    getDateRange();
-
-    // add a loading indicator to map
-    api
-      .map(mapId)
-      .addComponent('loadingIndicator', <CircularProgress isLoaded={loaded} />);
+      loadMapLayer();
+    }
 
     // listen to map click events
-    const map = api.map(mapId).map;
-
     map.on('click', (e: any) => {
       const point = e.latlng;
 
@@ -192,7 +188,19 @@ export const ClimateEngine = (): JSX.Element => {
     return () => {
       map.off('click');
     };
-  }, [getDateRange]);
+  }, [startDate, endDate, loaded]);
+
+  useEffect(() => {
+    createProcessProgressModal();
+    createChartModal();
+
+    getDateRange();
+
+    // add a loading indicator to map
+    api
+      .map(mapId)
+      .addComponent('loadingIndicator', <CircularProgress isLoaded={loaded} />);
+  }, []);
 
   /**
    * Create a loading progress modal
@@ -204,6 +212,35 @@ export const ClimateEngine = (): JSX.Element => {
       id: modalId,
       content: <CircularProgress isLoaded={inProcess} />,
     });
+  };
+
+  /**
+   * Create a chart modal
+   */
+  const createChartModal = () => {
+    const modalId = 'chartModal';
+
+    // button props
+    const button = {
+      id: modalId,
+      tooltip: 'chart',
+      tooltipPlacement: 'left',
+      icon: '<i class="material-icons">map</i>',
+      visible: false,
+      type: 'icon',
+    };
+
+    // panel props
+    const panel = {
+      title: 'chart',
+      icon: '<i class="material-icons">map</i>',
+      width: 300,
+    };
+
+    // create a new button panel on the appbar
+    cgpv.api
+      .map('mapWM')
+      .navBarButtons.createNavbarButtonPanel(button, panel, 'charts');
   };
 
   return (
@@ -246,7 +283,8 @@ export const ClimateEngine = (): JSX.Element => {
                 <TextField
                   id="startDate"
                   type="date"
-                  inputProps={{ value: startDate, min: minDate, max: maxDate }}
+                  value={startDate}
+                  inputProps={{ min: minDate, max: maxDate }}
                   onChange={(e: any) => setStartDate(e.target.value)}
                 />
               </div>
@@ -255,7 +293,8 @@ export const ClimateEngine = (): JSX.Element => {
                 <TextField
                   id="endDate"
                   type="date"
-                  inputProps={{ value: endDate, min: minDate, max: maxDate }}
+                  value={endDate}
+                  inputProps={{ min: minDate, max: maxDate }}
                   onChange={(e: any) => setEndDate(e.target.value)}
                 />
               </div>

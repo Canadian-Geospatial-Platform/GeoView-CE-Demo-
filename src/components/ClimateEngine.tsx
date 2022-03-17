@@ -70,8 +70,16 @@ export const ClimateEngine = (): JSX.Element => {
 
       tileLayer(basemapUrl).addTo(api.map(mapId).map);
 
-      buttonPanel.panel.close();
+      // buttonPanel.panel.close();
       // api.map(mapId).modal.modals['processIndicator'].close();
+
+      api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
+        message: {
+          type: 'key',
+          value: 'Processing Finished',
+          params: [],
+        },
+      });
     }
   };
 
@@ -170,6 +178,26 @@ export const ClimateEngine = (): JSX.Element => {
     }
   };
 
+  /**
+   * Search if marker already exists on map
+   *
+   * @param {number} lat the latitude point
+   * @param {number} lng the longtitude point
+   */
+  const searchMarkers = (lat: number, lng: number) => {
+    let markers = api.map(mapId).layer.vector.geometries;
+
+    for (let i = 0; i < markers.length; i++) {
+      const markerPoint = markers[i]._latlng;
+
+      if (markerPoint.lat === lat && markerPoint.lng === lng) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   useEffect(() => {
     if (startDate.length && endDate.length && !loaded) {
       setLoaded(true);
@@ -182,7 +210,13 @@ export const ClimateEngine = (): JSX.Element => {
     map.on('click', (e: any) => {
       const point = e.latlng;
 
+      // get time series at the click location and open a chart
       getTimeSeries(point.lat, point.lng);
+
+      let exists = searchMarkers(point.lat, point.lng);
+
+      if (!exists)
+        api.map(mapId).layer.vector.addMarker(point.lat, point.lng, {});
     });
 
     return () => {
@@ -234,7 +268,7 @@ export const ClimateEngine = (): JSX.Element => {
     const panel = {
       title: 'chart',
       icon: '<i class="material-icons">map</i>',
-      width: 300,
+      width: 500,
     };
 
     // create a new button panel on the appbar

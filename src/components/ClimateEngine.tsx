@@ -156,8 +156,10 @@ export const ClimateEngine = (): JSX.Element => {
         options: {},
       };
 
-      const chartButtonPanel =
-        api.map(mapId).navBarButtons.buttons['charts']['chartModal'];
+      api.map(mapId).modal.modals['chartContainer'].open();
+
+      // const chartButtonPanel =
+      //   api.map(mapId).navBarButtons.buttons['charts']['chartModal'];
 
       const chartElement = document.getElementById('chartContainer');
 
@@ -165,16 +167,34 @@ export const ClimateEngine = (): JSX.Element => {
         chartElement.outerHTML = '<canvas id="chartContainer"></canvas>';
       }
 
-      chartButtonPanel.panel.changeContent(
-        <canvas id="chartContainer"></canvas>,
-      );
+      // chartButtonPanel.panel.changeContent(
+      //   <canvas id="chartContainer"></canvas>,
+      // );
 
       const chart = new Chart(
         document.getElementById('chartContainer') as HTMLCanvasElement,
         config as any,
       );
 
-      chartButtonPanel.panel.open();
+      // const chartButtonPanel =
+      //   api.map(mapId).navBarButtons.buttons['charts']['chartModal'];
+
+      // const chartElement = document.getElementById('chartContainer');
+
+      // if (chartElement) {
+      //   chartElement.outerHTML = '<canvas id="chartContainer"></canvas>';
+      // }
+
+      // chartButtonPanel.panel.changeContent(
+      //   <canvas id="chartContainer"></canvas>,
+      // );
+
+      // const chart = new Chart(
+      //   document.getElementById('chartContainer') as HTMLCanvasElement,
+      //   config as any,
+      // );
+
+      // chartButtonPanel.panel.open();
     }
   };
 
@@ -275,6 +295,15 @@ export const ClimateEngine = (): JSX.Element => {
     cgpv.api
       .map('mapWM')
       .navBarButtons.createNavbarButtonPanel(button, panel, 'charts');
+
+    cgpv.api.map('mapWM').modal.createModal({
+      id: 'chartContainer',
+      content: <canvas id="chartContainer"></canvas>,
+      width: 750,
+      header: {
+        title: dataset,
+      },
+    });
   };
 
   return (

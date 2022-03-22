@@ -26,7 +26,7 @@ export const ClimateEngine = (): JSX.Element => {
 
   const { tileLayer } = leaflet;
 
-  const { useState, useEffect, useContext, useCallback } = react;
+  const { useState, useEffect, useContext } = react;
 
   const [loaded, setLoaded] = useState(false);
   const [inProcess, setInProcess] = useState(false);
@@ -40,9 +40,7 @@ export const ClimateEngine = (): JSX.Element => {
 
   const state = useContext(StateContext);
 
-  const { auth, mapId, buttonPanel } = state;
-
-  const { apiKey, deleteApiKey } = auth;
+  const { mapId } = state;
 
   const { Button, CircularProgress } = ui.elements;
   const { TextField, Select, MenuItem } = mui;
@@ -62,16 +60,12 @@ export const ClimateEngine = (): JSX.Element => {
       variable,
       startDate,
       endDate,
-      apiKey,
     )) as any;
 
     if (!result.details) {
       const basemapUrl = result.tile_fetcher;
 
       tileLayer(basemapUrl).addTo(api.map(mapId).map);
-
-      // buttonPanel.panel.close();
-      // api.map(mapId).modal.modals['processIndicator'].close();
 
       api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
         message: {
@@ -88,7 +82,7 @@ export const ClimateEngine = (): JSX.Element => {
    */
   const getDateRange = async () => {
     // get supported date range for time series
-    const dateRange = (await API.getTimePeriodRange(dataset, apiKey)) as any;
+    const dateRange = (await API.getTimePeriodRange(dataset)) as any;
 
     if (!dateRange.details) {
       setMinDate(dateRange.min);
@@ -114,7 +108,6 @@ export const ClimateEngine = (): JSX.Element => {
       variable,
       startDate,
       endDate,
-      apiKey,
     );
 
     if (!Array.isArray(result)) {
@@ -158,43 +151,16 @@ export const ClimateEngine = (): JSX.Element => {
 
       api.map(mapId).modal.modals['chartContainer'].open();
 
-      // const chartButtonPanel =
-      //   api.map(mapId).navBarButtons.buttons['charts']['chartModal'];
-
       const chartElement = document.getElementById('chartContainer');
 
       if (chartElement) {
         chartElement.outerHTML = '<canvas id="chartContainer"></canvas>';
       }
 
-      // chartButtonPanel.panel.changeContent(
-      //   <canvas id="chartContainer"></canvas>,
-      // );
-
       const chart = new Chart(
         document.getElementById('chartContainer') as HTMLCanvasElement,
         config as any,
       );
-
-      // const chartButtonPanel =
-      //   api.map(mapId).navBarButtons.buttons['charts']['chartModal'];
-
-      // const chartElement = document.getElementById('chartContainer');
-
-      // if (chartElement) {
-      //   chartElement.outerHTML = '<canvas id="chartContainer"></canvas>';
-      // }
-
-      // chartButtonPanel.panel.changeContent(
-      //   <canvas id="chartContainer"></canvas>,
-      // );
-
-      // const chart = new Chart(
-      //   document.getElementById('chartContainer') as HTMLCanvasElement,
-      //   config as any,
-      // );
-
-      // chartButtonPanel.panel.open();
     }
   };
 
@@ -308,17 +274,6 @@ export const ClimateEngine = (): JSX.Element => {
 
   return (
     <div>
-      <Button
-        tooltip="Logout"
-        tooltipPlacement="right"
-        type="text"
-        variant="contained"
-        onClick={() => {
-          deleteApiKey();
-        }}
-      >
-        Logout
-      </Button>
       {loaded && (
         <div>
           <fieldset className={classes.fieldSetContainer}>

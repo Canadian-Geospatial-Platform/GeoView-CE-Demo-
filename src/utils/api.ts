@@ -7,18 +7,6 @@ import { httpGet } from './network';
  */
 export class API {
   /**
-   * Validate the provided token
-   *
-   * @param {string} token the token to validate
-   * @returns {Object} an object containing with success/fail message
-   */
-  static validateToken = async (token: string): Promise<Object> => {
-    const result = await httpGet(End_Points.VALIDATE_KEY, token);
-
-    return result;
-  };
-
-  /**
    * Get the available date range for the catalog for a dataset
    *
    * @param {string} dataset the dataset to look for
@@ -28,7 +16,7 @@ export class API {
    */
   static getTimePeriodRange = async (
     dataset: string,
-    apiKey: string,
+    apiKey?: string,
   ): Promise<Object> => {
     const result = await httpGet(
       `${End_Points.DATASET_DATES}?dataset=${dataset}`,
@@ -53,7 +41,7 @@ export class API {
     variable: string,
     startDate: string,
     endDate: string,
-    apiKey: string,
+    apiKey?: string,
   ): Promise<Object> => {
     const result = await httpGet(
       `${End_Points.RASTER_MAPID}/values?dataset=${dataset}&variable=${variable}&temporal_statistic=mean&start_date=${startDate}&end_date=${endDate}`,
@@ -82,7 +70,7 @@ export class API {
     variable: string,
     startDate: string,
     endDate: string,
-    apiKey: string,
+    apiKey?: string,
   ): Promise<Object> => {
     const result = await httpGet(
       `${End_Points.TIMESERIES_POINTS}/points?dataset=${dataset}&variable=${variable}&area_reducer=mean&start_date=${startDate}&end_date=${endDate}&coordinates=[[${lng},${lat}]]`,

@@ -18,4 +18,8 @@ export enum End_Points {
    * Get min and max time period
    */
   DATASET_DATES = '/metadata/dataset_dates',
+  /**
+   * Get dataset variables
+   */
+  DATASET_VARIABLES = '/metadata/dataset_variables',
 }

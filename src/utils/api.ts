@@ -39,6 +39,26 @@ export class API {
   };
 
   /**
+   * Get the available dataset variables
+   *
+   * @param {string} dataset the dataset to look for
+   * @param {string} apiKey Authentication token
+   *
+   * @returns {Object} An object containing the dataset variables
+   */
+  static getDatasetVariables = async (
+    dataset: string,
+    apiKey: string,
+  ): Promise<Object> => {
+    const result = await httpGet(
+      `${End_Points.DATASET_VARIABLES}?dataset=${dataset}`,
+      apiKey,
+    );
+
+    return result;
+  };
+
+  /**
    * Get a map layer with provided time period
    *
    * @param {string} dataset the dataset to use

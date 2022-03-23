@@ -31,12 +31,14 @@ export const ClimateEngine = (): JSX.Element => {
   const [loaded, setLoaded] = useState(false);
   const [inProcess, setInProcess] = useState(false);
 
+  const [loadedLayer, setLoadedLayer] = useState();
   const [minDate, setMinDate] = useState('');
   const [maxDate, setMaxDate] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [dataset, setDataset] = useState('LANDSAT8_SR');
   const [variable, setVariable] = useState('NDVI');
+  const [variables, setVariables] = useState([]);
 
   const state = useContext(StateContext);
 
@@ -45,7 +47,7 @@ export const ClimateEngine = (): JSX.Element => {
   const { apiKey, deleteApiKey } = auth;
 
   const { Button, CircularProgress } = ui.elements;
-  const { TextField, Select, MenuItem } = mui;
+  const { TextField, Select, MenuItem, ListSubheader } = mui;
 
   const classes = useStyles();
 
@@ -55,8 +57,6 @@ export const ClimateEngine = (): JSX.Element => {
    * Load the map layer for the selected date range on selected dataset and variable
    */
   const loadMapLayer = async () => {
-    // api.map(mapId).modal.modals['processIndicator'].open();
-
     const result = (await API.getMapLayer(
       dataset,
       variable,
@@ -68,11 +68,17 @@ export const ClimateEngine = (): JSX.Element => {
     if (!result.details) {
       const basemapUrl = result.tile_fetcher;
 
-      tileLayer(basemapUrl).addTo(api.map(mapId).map);
+      // remove previous layer if exists
+      if (loadedLayer) map.removeLayer(loadedLayer);
 
-      // buttonPanel.panel.close();
-      // api.map(mapId).modal.modals['processIndicator'].close();
+      // add the new layer
+      const layer = tileLayer(basemapUrl);
 
+      layer.addTo(api.map(mapId).map);
+
+      setLoadedLayer(layer);
+
+      // once done, notify user
       api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
         message: {
           type: 'key',
@@ -130,7 +136,7 @@ export const ClimateEngine = (): JSX.Element => {
       let data: number[] = [];
 
       for (var i = 0; i < result[0].length; i++) {
-        let value = result[0][i].NDVI;
+        let value = result[0][i][variable];
 
         if (value === -9999) value = 0;
 
@@ -158,43 +164,16 @@ export const ClimateEngine = (): JSX.Element => {
 
       api.map(mapId).modal.modals['chartContainer'].open();
 
-      // const chartButtonPanel =
-      //   api.map(mapId).navBarButtons.buttons['charts']['chartModal'];
-
       const chartElement = document.getElementById('chartContainer');
 
       if (chartElement) {
         chartElement.outerHTML = '<canvas id="chartContainer"></canvas>';
       }
 
-      // chartButtonPanel.panel.changeContent(
-      //   <canvas id="chartContainer"></canvas>,
-      // );
-
       const chart = new Chart(
         document.getElementById('chartContainer') as HTMLCanvasElement,
         config as any,
       );
-
-      // const chartButtonPanel =
-      //   api.map(mapId).navBarButtons.buttons['charts']['chartModal'];
-
-      // const chartElement = document.getElementById('chartContainer');
-
-      // if (chartElement) {
-      //   chartElement.outerHTML = '<canvas id="chartContainer"></canvas>';
-      // }
-
-      // chartButtonPanel.panel.changeContent(
-      //   <canvas id="chartContainer"></canvas>,
-      // );
-
-      // const chart = new Chart(
-      //   document.getElementById('chartContainer') as HTMLCanvasElement,
-      //   config as any,
-      // );
-
-      // chartButtonPanel.panel.open();
     }
   };
 
@@ -218,6 +197,29 @@ export const ClimateEngine = (): JSX.Element => {
     return false;
   };
 
+  /**
+   * Get the variables for the dataset
+   *
+   * @param {string} dataset the selected dataset
+   */
+  const getVariableByDataset = async (dataset: string) => {
+    let res = (await API.getDatasetVariables(dataset, apiKey)) as any;
+
+    if (res.variables && res.variables.length > 0) {
+      cgpv.api.map('mapWM').modal.modals['chartContainer'].update({
+        header: {
+          title: dataset,
+        },
+      });
+
+      setDataset(dataset);
+      setVariables(res.variables);
+      setVariable(res.variables[0]);
+
+      getDateRange();
+    }
+  };
+
   useEffect(() => {
     if (startDate.length && endDate.length && !loaded) {
       setLoaded(true);
@@ -233,10 +235,11 @@ export const ClimateEngine = (): JSX.Element => {
       // get time series at the click location and open a chart
       getTimeSeries(point.lat, point.lng);
 
-      let exists = searchMarkers(point.lat, point.lng);
+      api.map(mapId).layer.vector.deleteGeometry('clickPosition');
 
-      if (!exists)
-        api.map(mapId).layer.vector.addMarker(point.lat, point.lng, {});
+      api
+        .map(mapId)
+        .layer.vector.addMarker(point.lat, point.lng, {}, 'clickPosition');
     });
 
     return () => {
@@ -248,7 +251,7 @@ export const ClimateEngine = (): JSX.Element => {
     createProcessProgressModal();
     createChartModal();
 
-    getDateRange();
+    getVariableByDataset(dataset);
 
     // add a loading indicator to map
     api
@@ -326,14 +329,43 @@ export const ClimateEngine = (): JSX.Element => {
             <div>
               <div className={classes.fieldSetField}>
                 <label htmlFor="dataset">Dataset:</label>
-                <Select id="dataset" value={dataset} disabled>
-                  <MenuItem value="LANDSAT8_SR">LANDSAT8_SR</MenuItem>
+                <Select
+                  id="dataset"
+                  value={dataset}
+                  onChange={(e: any) => getVariableByDataset(e.target.value)}
+                >
+                  <ListSubheader>Landsat At-Surface Reflectance</ListSubheader>
+                  <MenuItem value="LANDSAT7_SR">
+                    Landsat 7 Surface Reflectance
+                  </MenuItem>
+                  <MenuItem value="LANDSAT8_SR">
+                    Landsat 8 Surface Reflectance
+                  </MenuItem>
+                  <ListSubheader>
+                    Landsat Top-Of-Atmosphere Reflectance
+                  </ListSubheader>
+                  <MenuItem value="LANDSAT7_TOA">
+                    Landsat 7 TOA Reflectance
+                  </MenuItem>
+                  <MenuItem value="LANDSAT8_TOA">
+                    Landsat 8 TOA Reflectance
+                  </MenuItem>
                 </Select>
               </div>
               <div className={classes.fieldSetField}>
                 <label htmlFor="variable">Variable:</label>
-                <Select id="variable" value={variable} disabled>
-                  <MenuItem value="NDVI">NDVI</MenuItem>
+                <Select
+                  id="variable"
+                  value={variable}
+                  onChange={(e: any) => setVariable(e.target.value)}
+                >
+                  {variables.map((item: string) => {
+                    return (
+                      <MenuItem key={item} value={item}>
+                        {item}
+                      </MenuItem>
+                    );
+                  })}
                 </Select>
               </div>
             </div>
@@ -341,6 +373,9 @@ export const ClimateEngine = (): JSX.Element => {
           <fieldset className={classes.fieldSetContainer}>
             <legend>Time Period</legend>
             <div>
+              <div>
+                Range: {minDate} to {maxDate}
+              </div>
               <div className={classes.fieldSetField}>
                 <label htmlFor="startDate">Start Date:</label>
                 <TextField

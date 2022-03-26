@@ -245,7 +245,7 @@ export const ClimateEngine = (): JSX.Element => {
     return () => {
       map.off('click');
     };
-  }, [startDate, endDate, loaded]);
+  }, [startDate, endDate, loaded, variable]);
 
   useEffect(() => {
     createProcessProgressModal();

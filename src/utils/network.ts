@@ -1,4 +1,6 @@
-export const API_URL = 'http://10.0.0.6';
+const axios = require('axios');
+
+export const API_URL = 'http://127.0.0.1:6000';
 
 /**
  * Make a get request on an endpoint
@@ -20,15 +22,25 @@ export const httpGet = async (
       headers['Authorization'] = token;
     }
 
-    const res = await fetch(API_URL + endPoint, {
-      method: 'GET',
-      headers,
-    });
+    // const res = await fetch(API_URL + endPoint, {
+    //   method: 'GET',
+    //   headers,
+    // });
 
-    const result = await res.json();
+    // const result = await res.json();
 
-    return result;
+    await axios
+      .get(API_URL + endPoint, {
+        headers: headers,
+      })
+      .then((result: any) => {
+        console.log(result);
+
+        return result;
+      })
+      .catch((error: any) => {});
   } catch (error) {
+    console.log(error);
     return error;
   }
 };

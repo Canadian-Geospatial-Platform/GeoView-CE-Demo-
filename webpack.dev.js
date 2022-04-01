@@ -6,6 +6,8 @@ const config = {
   mode: 'development',
   devtool: 'source-map',
   devServer: {
+    port: 3000,
+    host: '0.0.0.0',
     static: path.resolve(__dirname, 'public'),
     historyApiFallback: true,
     compress: true,

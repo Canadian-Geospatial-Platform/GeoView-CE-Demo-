@@ -1,7 +1,7 @@
 import Chart from 'chart.js/auto';
 
 import { API } from '../utils/api';
-import { StateContext } from './PanelContent';
+import { StateContext } from './CEPanelContent';
 
 const w = window as any;
 
@@ -79,7 +79,9 @@ export const ClimateEngine = (): JSX.Element => {
       setLoadedLayer(layer);
 
       // once done, notify user
-      api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
+      api.event.emit({
+        event: api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
+        handlerName: mapId,
         message: {
           type: 'key',
           value: 'Processing Finished',
@@ -124,7 +126,9 @@ export const ClimateEngine = (): JSX.Element => {
     );
 
     if (!Array.isArray(result)) {
-      api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
+      api.event.emit({
+        event: api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
+        handlerName: mapId,
         message: {
           type: 'key',
           value: 'No points found',
@@ -162,7 +166,7 @@ export const ClimateEngine = (): JSX.Element => {
         options: {},
       };
 
-      api.map(mapId).modal.modals['chartContainer'].open();
+      api.map(mapId).modal.modals['chartContainerModal'].open();
 
       const chartElement = document.getElementById('chartContainer');
 
@@ -206,7 +210,7 @@ export const ClimateEngine = (): JSX.Element => {
     let res = (await API.getDatasetVariables(dataset, apiKey)) as any;
 
     if (res.variables && res.variables.length > 0) {
-      cgpv.api.map('mapWM').modal.modals['chartContainer'].update({
+      cgpv.api.map('mapWM').modal.modals['chartContainerModal'].update({
         header: {
           title: dataset,
         },
@@ -300,7 +304,7 @@ export const ClimateEngine = (): JSX.Element => {
       .navBarButtons.createNavbarButtonPanel(button, panel, 'charts');
 
     cgpv.api.map('mapWM').modal.createModal({
-      id: 'chartContainer',
+      id: 'chartContainerModal',
       content: <canvas id="chartContainer"></canvas>,
       width: 750,
       header: {

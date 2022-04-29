@@ -1,4 +1,4 @@
-import { StateContext } from './PanelContent';
+import { StateContext } from './CEPanelContent';
 
 import { API } from '../utils/api';
 
@@ -53,7 +53,9 @@ export const Login = (): JSX.Element => {
     let res = (await API.validateToken(textFieldRef.current.value)) as any;
 
     if (res.detail) {
-      api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
+      api.event.emit({
+        event: api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
+        handlerName: mapId,
         message: {
           type: 'key',
           value: res.detail,

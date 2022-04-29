@@ -2,7 +2,8 @@ import React, { useEffect, createContext, useState, useMemo } from 'react';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { PanelContent } from './PanelContent';
+import { CEPanelContent } from './CEPanelContent';
+import { GEEPanelContent } from './GEEPanelContent';
 
 /**
  * main container and map styling
@@ -66,10 +67,10 @@ const App = (): JSX.Element => {
       const { language }: { language: 'en-CA' | 'fr-CA' } = mapInstance;
 
       // button props
-      const button = {
-        // set ID to testPanelButton so that it can be accessed from the core viewer
-        id: 'testPanelButton',
-        tooltip: translations[language].custom.panelTitle,
+      const ceButton = {
+        // set ID to ceButtonPanel so that it can be accessed from the core viewer
+        id: 'ceButtonPanel',
+        tooltip: translations[language].custom.cePanelTitle,
         tooltipPlacement: 'right',
         icon: '<i class="material-icons">map</i>',
         visible: true,
@@ -77,21 +78,50 @@ const App = (): JSX.Element => {
       };
 
       // panel props
-      const panel = {
-        title: translations[language].custom.panelTitle,
+      const cePanel = {
+        title: translations[language].custom.cePanelTitle,
         icon: '<i class="material-icons">map</i>',
         width: 300,
       };
 
       // create a new button panel on the appbar
-      const buttonPanel = cgpv.api
+      const ceButtonPanel = cgpv.api
         .map('mapWM')
-        .appBarButtons.createAppbarPanel(button, panel, null);
+        .appBarButtons.createAppbarPanel(ceButton, cePanel, null);
 
       // set panel content
-      buttonPanel?.panel?.changeContent(
-        <PanelContent buttonPanel={buttonPanel} mapId={'mapWM'} />,
+      ceButtonPanel?.panel?.changeContent(
+        <CEPanelContent buttonPanel={ceButtonPanel} mapId={'mapWM'} />,
       );
+
+      // // create Google Earth Engine Panel
+      // // button props
+      // const geeButton = {
+      //   // set ID to geeButtonPanel so that it can be accessed from the core viewer
+      //   id: 'geeButtonPanel',
+      //   tooltip: translations[language].custom.geePanelTitle,
+      //   tooltipPlacement: 'right',
+      //   icon: '<i class="material-icons">public</i>',
+      //   visible: true,
+      //   type: 'icon',
+      // };
+
+      // // panel props
+      // const geePanel = {
+      //   title: translations[language].custom.geePanelTitle,
+      //   icon: '<i class="material-icons">public</i>',
+      //   width: 300,
+      // };
+
+      // // create a new button panel on the appbar
+      // const geeButtonPanel = cgpv.api
+      //   .map('mapWM')
+      //   .appBarButtons.createAppbarPanel(geeButton, geePanel, null);
+
+      // // set panel content
+      // geeButtonPanel?.panel?.changeContent(
+      //   <GEEPanelContent buttonPanel={geeButtonPanel} mapId={'mapWM'} />,
+      // );
     });
   }, []);
 
@@ -103,7 +133,25 @@ const App = (): JSX.Element => {
         height: '100vh',
         zIndex: 0,
       }}
-      data-leaflet="{ 'name': 'Web Mercator', 'projection': 3857, 'zoom': 4, 'center': [60,-96], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': false, 'labeled': true }, 'layers': [] } "
+      data-lang="en-CA"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'initialView': {
+            'zoom': 4,
+            'center': [60, -100]
+          },
+          'projection': 3857,
+          'basemapOptions': {
+            'id': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'layers': []
+        },
+        'theme': 'dark',
+        'languages': ['en-CA']
+        }"
     ></div>
   );
 };

@@ -15,7 +15,7 @@ export const StateContext = createContext({});
 /**
  * Panel Content Properties
  */
-interface PanelContentProps {
+interface CEPanelContentProps {
   mapId: string;
   buttonPanel: any;
 }
@@ -23,10 +23,10 @@ interface PanelContentProps {
 /**
  * Create a new panel content
  *
- * @param {PanelContentProps} props panel content properties
+ * @param {CEPanelContentProps} props panel content properties
  * @returns {JSX.Element} the new create panel content
  */
-export const PanelContent = (props: PanelContentProps): JSX.Element => {
+export const CEPanelContent = (props: CEPanelContentProps): JSX.Element => {
   const { buttonPanel, mapId } = props;
 
   const { ui, mui, react } = cgpv;

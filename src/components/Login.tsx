@@ -31,15 +31,14 @@ const useStyles = makeStyles((theme: any) => ({
  * @returns {JSX.Element} a login component
  */
 export const Login = (): JSX.Element => {
-  const { ui, mui, react, api } = cgpv;
+  const { ui, react, api } = cgpv;
 
   const { createRef, useContext } = react;
 
   const textFieldRef = createRef();
   const state = useContext(StateContext);
 
-  const { TextField } = mui;
-  const { Button } = ui.elements;
+  const { TextField, Button } = ui.elements;
 
   const mapId = state.mapId;
 

@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme: any) => ({
 }));
 
 export const ClimateEngine = (): JSX.Element => {
-  const { ui, mui, react, types, api, leaflet } = cgpv;
+  const { ui, react, types, api, leaflet } = cgpv;
 
   const { tileLayer } = leaflet;
 
@@ -46,8 +46,8 @@ export const ClimateEngine = (): JSX.Element => {
 
   const { apiKey, deleteApiKey } = auth;
 
-  const { Button, CircularProgress } = ui.elements;
-  const { TextField, Select, MenuItem, ListSubheader } = mui;
+  const { Select, TextField, Button, CircularProgress } = ui.elements;
+  // const { ListSubheader } = mui;
 
   const classes = useStyles();
 
@@ -337,24 +337,45 @@ export const ClimateEngine = (): JSX.Element => {
                   id="dataset"
                   value={dataset}
                   onChange={(e: any) => getVariableByDataset(e.target.value)}
-                >
-                  <ListSubheader>Landsat At-Surface Reflectance</ListSubheader>
-                  <MenuItem value="LANDSAT7_SR">
-                    Landsat 7 Surface Reflectance
-                  </MenuItem>
-                  <MenuItem value="LANDSAT8_SR">
-                    Landsat 8 Surface Reflectance
-                  </MenuItem>
-                  <ListSubheader>
-                    Landsat Top-Of-Atmosphere Reflectance
-                  </ListSubheader>
-                  <MenuItem value="LANDSAT7_TOA">
-                    Landsat 7 TOA Reflectance
-                  </MenuItem>
-                  <MenuItem value="LANDSAT8_TOA">
-                    Landsat 8 TOA Reflectance
-                  </MenuItem>
-                </Select>
+                  menuItems={[
+                    {
+                      type: 'header',
+                      item: {
+                        children: 'Landsat At-Surface Reflectance',
+                      },
+                    },
+                    {
+                      item: {
+                        value: 'LANDSAT7_SR',
+                        children: 'Landsat 7 Surface Reflectance',
+                      },
+                    },
+                    {
+                      item: {
+                        value: 'LANDSAT8_SR',
+                        children: 'Landsat 8 Surface Reflectance',
+                      },
+                    },
+                    {
+                      type: 'header',
+                      item: {
+                        children: 'Landsat Top-Of-Atmosphere Reflectance',
+                      },
+                    },
+                    {
+                      item: {
+                        value: 'LANDSAT7_TOA',
+                        children: 'Landsat 7 TOA Reflectance',
+                      },
+                    },
+                    {
+                      item: {
+                        value: 'LANDSAT8_TOA',
+                        children: 'Landsat 8 TOA Reflectance',
+                      },
+                    },
+                  ]}
+                />
               </div>
               <div className={classes.fieldSetField}>
                 <label htmlFor="variable">Variable:</label>
@@ -362,15 +383,16 @@ export const ClimateEngine = (): JSX.Element => {
                   id="variable"
                   value={variable}
                   onChange={(e: any) => setVariable(e.target.value)}
-                >
-                  {variables.map((item: string) => {
-                    return (
-                      <MenuItem key={item} value={item}>
-                        {item}
-                      </MenuItem>
-                    );
+                  menuItems={variables.map((item: string) => {
+                    return {
+                      key: item,
+                      item: {
+                        value: item,
+                        children: item,
+                      },
+                    };
                   })}
-                </Select>
+                />
               </div>
             </div>
           </fieldset>

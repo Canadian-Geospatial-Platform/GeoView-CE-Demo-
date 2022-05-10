@@ -1,9 +1,25 @@
-import React, { useEffect, createContext, useState, useMemo } from 'react';
+// import React, { useEffect, createContext, useState, useMemo } from 'react';
+import React, { useEffect } from 'react';
 
 import makeStyles from '@mui/styles/makeStyles';
 
 import { CEPanelContent } from './CEPanelContent';
-import { GEEPanelContent } from './GEEPanelContent';
+// import { GEEPanelContent } from './GEEPanelContent';
+
+import translationEn from '../../public/locales/en-CA/translation.json';
+import translationFr from '../../public/locales/fr-CA/translation.json';
+
+import {
+  TypeButtonProps,
+  TypePanelProps,
+  TypeWindow,
+} from '../../geoview-core-types/src/app.d';
+
+// get reference to window object
+const w = window as TypeWindow;
+
+// get reference to geoview apis
+const cgpv = w['cgpv'];
 
 /**
  * main container and map styling
@@ -13,15 +29,6 @@ const useStyles = makeStyles((theme) => ({
     height: '100vh',
   },
 }));
-
-// get reference to window object
-const w = window as any;
-
-// get reference to geoview apis
-const cgpv = w['cgpv'];
-
-import translationEn from '../../public/locales/en-CA/translation.json';
-import translationFr from '../../public/locales/fr-CA/translation.json';
 
 /**
  * Create a container containing a leaflet map using the GeoView viewer
@@ -67,7 +74,7 @@ const App = (): JSX.Element => {
       const { language }: { language: 'en-CA' | 'fr-CA' } = mapInstance;
 
       // button props
-      const ceButton = {
+      const ceButton: TypeButtonProps = {
         // set ID to ceButtonPanel so that it can be accessed from the core viewer
         id: 'ceButtonPanel',
         tooltip: translations[language].custom.cePanelTitle,
@@ -78,7 +85,7 @@ const App = (): JSX.Element => {
       };
 
       // panel props
-      const cePanel = {
+      const cePanel: TypePanelProps = {
         title: translations[language].custom.cePanelTitle,
         icon: '<i class="material-icons">map</i>',
         width: 300,

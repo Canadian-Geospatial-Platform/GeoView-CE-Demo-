@@ -2,8 +2,10 @@ import { StateContext } from './CEPanelContent';
 
 import { API } from '../utils/api';
 
+import { TypeWindow } from '../../geoview-core-types/src/app.d';
+
 // get reference to window object
-const w = window as any;
+const w = window as TypeWindow;
 
 // get reference to geoview apis
 const cgpv = w['cgpv'];
@@ -31,11 +33,11 @@ const useStyles = makeStyles((theme: any) => ({
  * @returns {JSX.Element} a login component
  */
 export const Login = (): JSX.Element => {
-  const { ui, react, api } = cgpv;
+  const { ui, react, api, types } = cgpv;
 
   const { createRef, useContext } = react;
 
-  const textFieldRef = createRef();
+  const textFieldRef = createRef<HTMLInputElement>();
   const state = useContext(StateContext);
 
   const { TextField, Button } = ui.elements;
@@ -48,21 +50,25 @@ export const Login = (): JSX.Element => {
    * Login function
    */
   const login = async () => {
-    // request the validate end point to check if token is valid
-    let res = (await API.validateToken(textFieldRef.current.value)) as any;
+    if (textFieldRef && textFieldRef.current) {
+      // request the validate end point to check if token is valid
+      let res = (await API.validateToken(textFieldRef.current.value)) as any;
 
-    if (res.detail) {
-      api.event.emit({
-        event: api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
-        handlerName: mapId,
-        message: {
-          type: 'key',
-          value: res.detail,
-          params: [],
-        },
-      });
-    } else {
-      state.auth.saveApiKey(textFieldRef.current.value);
+      if (res.detail) {
+        api.event.emit(
+          types.snackbarMessagePayload(
+            api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
+            mapId,
+            {
+              type: 'key',
+              value: res.detail,
+              params: [],
+            },
+          ),
+        );
+      } else {
+        state.auth.saveApiKey(textFieldRef.current.value);
+      }
     }
   };
 

@@ -1,9 +1,15 @@
 import Chart from 'chart.js/auto';
 
 import { API } from '../utils/api';
-import { StateContext } from './CEPanelContent';
+import { StateContext, TypeStateContext } from './CEPanelContent';
 
-const w = window as any;
+import {
+  TypeButtonProps,
+  TypePanelProps,
+  TypeWindow,
+} from '../../geoview-core-types/src/app.d';
+
+const w = window as TypeWindow;
 
 const cgpv = w['cgpv'];
 
@@ -79,15 +85,17 @@ export const ClimateEngine = (): JSX.Element => {
       setLoadedLayer(layer);
 
       // once done, notify user
-      api.event.emit({
-        event: api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
-        handlerName: mapId,
-        message: {
-          type: 'key',
-          value: 'Processing Finished',
-          params: [],
-        },
-      });
+      api.event.emit(
+        types.snackbarMessagePayload(
+          api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
+          mapId,
+          {
+            type: 'key',
+            value: 'Processing Finished',
+            params: [],
+          },
+        ),
+      );
     }
   };
 
@@ -126,15 +134,17 @@ export const ClimateEngine = (): JSX.Element => {
     );
 
     if (!Array.isArray(result)) {
-      api.event.emit({
-        event: api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
-        handlerName: mapId,
-        message: {
-          type: 'key',
-          value: 'No points found',
-          params: [],
-        },
-      });
+      api.event.emit(
+        types.snackbarMessagePayload(
+          api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
+          mapId,
+          {
+            type: 'key',
+            value: 'No points found',
+            params: [],
+          },
+        ),
+      );
     } else {
       let labels: string[] = [];
       let data: number[] = [];
@@ -211,6 +221,7 @@ export const ClimateEngine = (): JSX.Element => {
 
     if (res.variables && res.variables.length > 0) {
       cgpv.api.map('mapWM').modal.modals['chartContainerModal'].update({
+        content: '',
         header: {
           title: dataset,
         },
@@ -282,7 +293,7 @@ export const ClimateEngine = (): JSX.Element => {
     const modalId = 'chartModal';
 
     // button props
-    const button = {
+    const button: TypeButtonProps = {
       id: modalId,
       tooltip: 'chart',
       tooltipPlacement: 'left',
@@ -292,7 +303,7 @@ export const ClimateEngine = (): JSX.Element => {
     };
 
     // panel props
-    const panel = {
+    const panel: TypePanelProps = {
       title: 'chart',
       icon: '<i class="material-icons">map</i>',
       width: 500,
@@ -337,6 +348,9 @@ export const ClimateEngine = (): JSX.Element => {
                   id="dataset"
                   value={dataset}
                   onChange={(e: any) => getVariableByDataset(e.target.value)}
+                  inputLabel={{
+                    id: 'select-dataset',
+                  }}
                   menuItems={[
                     {
                       type: 'header',
@@ -383,6 +397,9 @@ export const ClimateEngine = (): JSX.Element => {
                   id="variable"
                   value={variable}
                   onChange={(e: any) => setVariable(e.target.value)}
+                  inputLabel={{
+                    id: 'select-variable',
+                  }}
                   menuItems={variables.map((item: string) => {
                     return {
                       key: item,

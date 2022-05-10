@@ -1,6 +1,8 @@
 var ee = require('@google/earthengine');
 
-const w = window as any;
+import { TypeWindow } from '../../geoview-core-types/src/app';
+
+const w = window as TypeWindow;
 
 // get reference to geoview apis
 const cgpv = w['cgpv'];

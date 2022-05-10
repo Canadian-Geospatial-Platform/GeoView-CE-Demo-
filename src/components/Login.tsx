@@ -2,7 +2,7 @@ import { StateContext } from './CEPanelContent';
 
 import { API } from '../utils/api';
 
-import { TypeWindow } from '../../geoview-core-types/src/app.d';
+import { TypeWindow } from 'geoview-core-types';
 
 // get reference to window object
 const w = window as TypeWindow;

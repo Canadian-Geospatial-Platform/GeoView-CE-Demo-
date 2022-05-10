@@ -1,10 +1,7 @@
 import { Login } from './Login';
 import { ClimateEngine } from './ClimateEngine';
 
-import {
-  TypeButtonPanel,
-  TypeWindow,
-} from '../../geoview-core-types/src/app.d';
+import { TypeButtonPanel, TypeWindow } from 'geoview-core-types';
 
 const w = window as TypeWindow;
 

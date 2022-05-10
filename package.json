@@ -23,7 +23,8 @@
     "@mui/styles": "^5.5.0",
     "chart.js": "^3.7.1",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "geoview-core-types": "https://gitpkg.now.sh/yass0016/GeoView/packages/geoview-core/types?2f600d0ae5d96b9788477d162c53f2a36b8147b4"
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",

@@ -1,6 +1,6 @@
 var ee = require('@google/earthengine');
 
-import { TypeWindow } from '../../geoview-core-types/src/app';
+import { TypeWindow } from 'geoview-core-types';
 
 const w = window as TypeWindow;
 

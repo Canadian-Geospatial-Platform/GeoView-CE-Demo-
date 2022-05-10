@@ -7,7 +7,7 @@ import {
   TypeButtonProps,
   TypePanelProps,
   TypeWindow,
-} from '../../geoview-core-types/src/app.d';
+} from 'geoview-core-types';
 
 const w = window as TypeWindow;
 

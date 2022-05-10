@@ -1,6 +1,6 @@
 {
   "name": "geoview-ce-demo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A project that uses GeoView to showcase the use of Climate Engine",
   "main": "src/index.tsx",
   "private": true,

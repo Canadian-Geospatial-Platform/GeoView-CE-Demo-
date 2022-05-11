@@ -22,9 +22,9 @@
     "@mui/material": "^5.5.0",
     "@mui/styles": "^5.5.0",
     "chart.js": "^3.7.1",
+    "geoview-core-types": "github:Canadian-Geospatial-Platform/GeoView#types",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "geoview-core-types": "https://gitpkg.now.sh/yass0016/GeoView/packages/geoview-core/types?2f600d0ae5d96b9788477d162c53f2a36b8147b4"
+    "react-dom": "^17.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",
@@ -41,8 +41,8 @@
     "gh-pages": "^3.2.3",
     "html-webpack-plugin": "^5.5.0",
     "path": "^0.12.7",
-    "style-loader": "^3.3.1",
     "prettier": "^2.6.2",
+    "style-loader": "^3.3.1",
     "ts-loader": "^9.2.6",
     "typescript": "^4.5.5",
     "webpack": "^5.69.1",

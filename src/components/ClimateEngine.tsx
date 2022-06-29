@@ -4,7 +4,7 @@ import { API } from '../utils/api';
 import { StateContext, TypeStateContext } from './CEPanelContent';
 
 import {
-  TypeButtonProps,
+  TypeIconButtonProps,
   TypePanelProps,
   TypeWindow,
 } from 'geoview-core-types';
@@ -28,16 +28,14 @@ const useStyles = makeStyles((theme: any) => ({
 }));
 
 export const ClimateEngine = (): JSX.Element => {
-  const { ui, react, types, api, leaflet } = cgpv;
-
-  const { tileLayer } = leaflet;
+  const { ui, react, types, api } = cgpv;
 
   const { useState, useEffect, useContext, useCallback } = react;
 
   const [loaded, setLoaded] = useState(false);
   const [inProcess, setInProcess] = useState(false);
 
-  const [loadedLayer, setLoadedLayer] = useState();
+  const [loadedLayer, setLoadedLayer] = useState<string>();
   const [minDate, setMinDate] = useState('');
   const [maxDate, setMaxDate] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -59,6 +57,8 @@ export const ClimateEngine = (): JSX.Element => {
 
   const map = api.map(mapId).map;
 
+  const { MapIcon } = ui.elements;
+
   /**
    * Load the map layer for the selected date range on selected dataset and variable
    */
@@ -75,14 +75,18 @@ export const ClimateEngine = (): JSX.Element => {
       const basemapUrl = result.tile_fetcher;
 
       // remove previous layer if exists
-      if (loadedLayer) map.removeLayer(loadedLayer);
+      if (loadedLayer) api.map(mapId).layer.removeLayerById(loadedLayer);
 
       // add the new layer
-      const layer = tileLayer(basemapUrl);
+      const layerId = api.map(mapId).layer.addLayer({
+        layerType: 'xyzTiles',
+        url: {
+          en: basemapUrl,
+          fr: basemapUrl,
+        },
+      });
 
-      layer.addTo(api.map(mapId).map);
-
-      setLoadedLayer(layer);
+      setLoadedLayer(layerId);
 
       // once done, notify user
       api.event.emit(
@@ -192,26 +196,6 @@ export const ClimateEngine = (): JSX.Element => {
   };
 
   /**
-   * Search if marker already exists on map
-   *
-   * @param {number} lat the latitude point
-   * @param {number} lng the longtitude point
-   */
-  const searchMarkers = (lat: number, lng: number) => {
-    let markers = api.map(mapId).layer.vector.geometries;
-
-    for (let i = 0; i < markers.length; i++) {
-      const markerPoint = markers[i]._latlng;
-
-      if (markerPoint.lat === lat && markerPoint.lng === lng) {
-        return true;
-      }
-    }
-
-    return false;
-  };
-
-  /**
    * Get the variables for the dataset
    *
    * @param {string} dataset the selected dataset
@@ -235,6 +219,25 @@ export const ClimateEngine = (): JSX.Element => {
     }
   };
 
+  const mapClick = (e: any) => {
+    const point = e.coordinate;
+
+    const coordinate = api.projection.transformPoints(
+      e.coordinate,
+      'EPSG:3857',
+      'EPSG:4326',
+    )[0] as number[];
+
+    // get time series at the click location and open a chart
+    getTimeSeries(coordinate[1], coordinate[0]);
+
+    api.map(mapId).layer.vector?.deleteGeometry('clickPosition');
+
+    api
+      .map(mapId)
+      .layer.vector?.addMarker([point[0], point[1]], {}, 'clickPosition');
+  };
+
   useEffect(() => {
     if (startDate.length && endDate.length && !loaded) {
       setLoaded(true);
@@ -244,21 +247,10 @@ export const ClimateEngine = (): JSX.Element => {
     }
 
     // listen to map click events
-    map.on('click', (e: any) => {
-      const point = e.latlng;
-
-      // get time series at the click location and open a chart
-      getTimeSeries(point.lat, point.lng);
-
-      api.map(mapId).layer.vector.deleteGeometry('clickPosition');
-
-      api
-        .map(mapId)
-        .layer.vector.addMarker(point.lat, point.lng, {}, 'clickPosition');
-    });
+    map.on('click', mapClick);
 
     return () => {
-      map.off('click');
+      map.un('click', mapClick);
     };
   }, [startDate, endDate, loaded, variable]);
 
@@ -293,19 +285,18 @@ export const ClimateEngine = (): JSX.Element => {
     const modalId = 'chartModal';
 
     // button props
-    const button: TypeButtonProps = {
+    const button: TypeIconButtonProps = {
       id: modalId,
       tooltip: 'chart',
       tooltipPlacement: 'left',
-      icon: '<i class="material-icons">map</i>',
+      children: <MapIcon />,
       visible: false,
-      type: 'icon',
     };
 
     // panel props
     const panel: TypePanelProps = {
       title: 'chart',
-      icon: '<i class="material-icons">map</i>',
+      icon: <MapIcon />,
       width: 500,
     };
 

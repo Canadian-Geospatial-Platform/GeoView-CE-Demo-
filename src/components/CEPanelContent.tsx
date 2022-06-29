@@ -37,9 +37,7 @@ export const StateContext = createContext<TypeStateContext>({
   mapId: '',
   buttonPanel: {
     id: '',
-    button: {
-      type: 'text',
-    },
+    button: {},
   },
 });
 

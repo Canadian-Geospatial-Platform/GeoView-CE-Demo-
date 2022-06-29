@@ -10,7 +10,7 @@ import translationEn from '../../public/locales/en-CA/translation.json';
 import translationFr from '../../public/locales/fr-CA/translation.json';
 
 import {
-  TypeButtonProps,
+  TypeIconButtonProps,
   TypePanelProps,
   TypeWindow,
 } from 'geoview-core-types';
@@ -73,21 +73,22 @@ const App = (): JSX.Element => {
       // get language
       const { language }: { language: 'en-CA' | 'fr-CA' } = mapInstance;
 
+      const MapIcon = cgpv.ui.elements.MapIcon;
+
       // button props
-      const ceButton: TypeButtonProps = {
+      const ceButton: TypeIconButtonProps = {
         // set ID to ceButtonPanel so that it can be accessed from the core viewer
         id: 'ceButtonPanel',
         tooltip: translations[language].custom.cePanelTitle,
         tooltipPlacement: 'right',
-        icon: '<i class="material-icons">map</i>',
+        children: <MapIcon />,
         visible: true,
-        type: 'icon',
       };
 
       // panel props
       const cePanel: TypePanelProps = {
         title: translations[language].custom.cePanelTitle,
-        icon: '<i class="material-icons">map</i>',
+        icon: <MapIcon />,
         width: 300,
       };
 
@@ -146,7 +147,7 @@ const App = (): JSX.Element => {
           'interaction': 'dynamic',
           'initialView': {
             'zoom': 4,
-            'center': [60, -100]
+            'center': [-100, 60]
           },
           'projection': 3857,
           'basemapOptions': {

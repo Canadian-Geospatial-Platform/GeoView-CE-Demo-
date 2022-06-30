@@ -19,6 +19,7 @@ const useStyles = makeStyles((theme: any) => ({
   fieldSetContainer: {
     marginTop: 10,
     marginBottom: 10,
+    maxWidth: 400,
   },
   fieldSetField: {
     display: 'flex',
@@ -255,6 +256,15 @@ export const ClimateEngine = (): JSX.Element => {
   }, [startDate, endDate, loaded, variable]);
 
   useEffect(() => {
+    const panelContainerQuery =
+      document.getElementsByClassName('MuiPaper-root');
+
+    if (panelContainerQuery && panelContainerQuery.length > 0) {
+      const panelContainer = panelContainerQuery[0] as HTMLElement;
+
+      panelContainer.style.width = 410 + 'px';
+    }
+
     createProcessProgressModal();
     createChartModal();
 
@@ -282,29 +292,6 @@ export const ClimateEngine = (): JSX.Element => {
    * Create a chart modal
    */
   const createChartModal = () => {
-    const modalId = 'chartModal';
-
-    // button props
-    const button: TypeIconButtonProps = {
-      id: modalId,
-      tooltip: 'chart',
-      tooltipPlacement: 'left',
-      children: <MapIcon />,
-      visible: false,
-    };
-
-    // panel props
-    const panel: TypePanelProps = {
-      title: 'chart',
-      icon: <MapIcon />,
-      width: 500,
-    };
-
-    // create a new button panel on the appbar
-    cgpv.api
-      .map('mapWM')
-      .navBarButtons.createNavbarButtonPanel(button, panel, 'charts');
-
     cgpv.api.map('mapWM').modal.createModal({
       id: 'chartContainerModal',
       content: <canvas id="chartContainer"></canvas>,
@@ -416,7 +403,11 @@ export const ClimateEngine = (): JSX.Element => {
                   id="startDate"
                   type="date"
                   value={startDate}
-                  inputProps={{ min: minDate, max: maxDate }}
+                  inputProps={{
+                    min: minDate,
+                    max: maxDate,
+                    style: { color: '#fff' },
+                  }}
                   onChange={(e: any) => setStartDate(e.target.value)}
                 />
               </div>
@@ -426,7 +417,11 @@ export const ClimateEngine = (): JSX.Element => {
                   id="endDate"
                   type="date"
                   value={endDate}
-                  inputProps={{ min: minDate, max: maxDate }}
+                  inputProps={{
+                    min: minDate,
+                    max: maxDate,
+                    style: { color: '#fff' },
+                  }}
                   onChange={(e: any) => setEndDate(e.target.value)}
                 />
               </div>

@@ -89,7 +89,7 @@ const App = (): JSX.Element => {
       const cePanel: TypePanelProps = {
         title: translations[language].custom.cePanelTitle,
         icon: <MapIcon />,
-        width: 300,
+        width: 500,
       };
 
       // create a new button panel on the appbar

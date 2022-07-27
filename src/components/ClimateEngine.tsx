@@ -1,9 +1,15 @@
 import Chart from 'chart.js/auto';
 
 import { API } from '../utils/api';
-import { StateContext } from './PanelContent';
+import { StateContext, TypeStateContext } from './CEPanelContent';
 
-const w = window as any;
+import {
+  TypeIconButtonProps,
+  TypePanelProps,
+  TypeWindow,
+} from 'geoview-core-types';
+
+const w = window as TypeWindow;
 
 const cgpv = w['cgpv'];
 
@@ -13,6 +19,7 @@ const useStyles = makeStyles((theme: any) => ({
   fieldSetContainer: {
     marginTop: 10,
     marginBottom: 10,
+    maxWidth: 400,
   },
   fieldSetField: {
     display: 'flex',
@@ -22,21 +29,21 @@ const useStyles = makeStyles((theme: any) => ({
 }));
 
 export const ClimateEngine = (): JSX.Element => {
-  const { ui, mui, react, types, api, leaflet } = cgpv;
-
-  const { tileLayer } = leaflet;
+  const { ui, react, types, api } = cgpv;
 
   const { useState, useEffect, useContext, useCallback } = react;
 
   const [loaded, setLoaded] = useState(false);
   const [inProcess, setInProcess] = useState(false);
 
+  const [loadedLayer, setLoadedLayer] = useState<string>();
   const [minDate, setMinDate] = useState('');
   const [maxDate, setMaxDate] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [dataset, setDataset] = useState('LANDSAT8_SR');
   const [variable, setVariable] = useState('NDVI');
+  const [variables, setVariables] = useState([]);
 
   const state = useContext(StateContext);
 
@@ -44,19 +51,19 @@ export const ClimateEngine = (): JSX.Element => {
 
   const { apiKey, deleteApiKey } = auth;
 
-  const { Button, CircularProgress } = ui.elements;
-  const { TextField, Select, MenuItem } = mui;
+  const { Select, TextField, Button, CircularProgress } = ui.elements;
+  // const { ListSubheader } = mui;
 
   const classes = useStyles();
 
   const map = api.map(mapId).map;
 
+  const { MapIcon } = ui.elements;
+
   /**
    * Load the map layer for the selected date range on selected dataset and variable
    */
   const loadMapLayer = async () => {
-    // api.map(mapId).modal.modals['processIndicator'].open();
-
     const result = (await API.getMapLayer(
       dataset,
       variable,
@@ -68,18 +75,32 @@ export const ClimateEngine = (): JSX.Element => {
     if (!result.details) {
       const basemapUrl = result.tile_fetcher;
 
-      tileLayer(basemapUrl).addTo(api.map(mapId).map);
+      // remove previous layer if exists
+      if (loadedLayer) api.map(mapId).layer.removeLayerById(loadedLayer);
 
-      // buttonPanel.panel.close();
-      // api.map(mapId).modal.modals['processIndicator'].close();
-
-      api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
-        message: {
-          type: 'key',
-          value: 'Processing Finished',
-          params: [],
+      // add the new layer
+      const layerId = api.map(mapId).layer.addLayer({
+        layerType: 'xyzTiles',
+        url: {
+          en: basemapUrl,
+          fr: basemapUrl,
         },
       });
+
+      setLoadedLayer(layerId);
+
+      // once done, notify user
+      api.event.emit(
+        types.snackbarMessagePayload(
+          api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
+          mapId,
+          {
+            type: 'key',
+            value: 'Processing Finished',
+            params: [],
+          },
+        ),
+      );
     }
   };
 
@@ -107,7 +128,7 @@ export const ClimateEngine = (): JSX.Element => {
    * @param {number} lng longtitude value
    */
   const getTimeSeries = async (lat: number, lng: number) => {
-    const result = await API.getTimeSeries(
+    const result = (await API.getTimeSeries(
       lat,
       lng,
       dataset,
@@ -115,107 +136,109 @@ export const ClimateEngine = (): JSX.Element => {
       startDate,
       endDate,
       apiKey,
-    );
+    )) as any;
 
-    if (!Array.isArray(result)) {
-      api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
-        message: {
-          type: 'key',
-          value: 'No points found',
-          params: [],
-        },
-      });
-    } else {
-      let labels: string[] = [];
-      let data: number[] = [];
+    if (!result.details) {
+      if (!Array.isArray(result)) {
+        api.event.emit(
+          types.snackbarMessagePayload(
+            api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
+            mapId,
+            {
+              type: 'key',
+              value: 'No points found',
+              params: [],
+            },
+          ),
+        );
+      } else {
+        let labels: string[] = [];
+        let data: number[] = [];
 
-      for (var i = 0; i < result[0].length; i++) {
-        let value = result[0][i].NDVI;
+        for (var i = 0; i < result[0].length; i++) {
+          let value = result[0][i][variable];
 
-        if (value === -9999) value = 0;
+          if (value === -9999) value = 0;
 
-        labels.push(result[0][i].Date);
-        data.push(value);
+          labels.push(result[0][i].Date);
+          data.push(value);
+        }
+
+        const chartData = {
+          labels: labels,
+          datasets: [
+            {
+              label: variable,
+              backgroundColor: 'rgb(255, 99, 132)',
+              borderColor: 'rgb(255, 99, 132)',
+              data,
+            },
+          ],
+        };
+
+        const config = {
+          type: 'line',
+          data: chartData,
+          options: {},
+        };
+
+        api.map(mapId).modal.modals['chartContainerModal'].open();
+
+        const chartElement = document.getElementById('chartContainer');
+
+        if (chartElement) {
+          chartElement.outerHTML = '<canvas id="chartContainer"></canvas>';
+        }
+
+        const chart = new Chart(
+          document.getElementById('chartContainer') as HTMLCanvasElement,
+          config as any,
+        );
       }
-
-      const chartData = {
-        labels: labels,
-        datasets: [
-          {
-            label: variable,
-            backgroundColor: 'rgb(255, 99, 132)',
-            borderColor: 'rgb(255, 99, 132)',
-            data,
-          },
-        ],
-      };
-
-      const config = {
-        type: 'line',
-        data: chartData,
-        options: {},
-      };
-
-      api.map(mapId).modal.modals['chartContainer'].open();
-
-      // const chartButtonPanel =
-      //   api.map(mapId).navBarButtons.buttons['charts']['chartModal'];
-
-      const chartElement = document.getElementById('chartContainer');
-
-      if (chartElement) {
-        chartElement.outerHTML = '<canvas id="chartContainer"></canvas>';
-      }
-
-      // chartButtonPanel.panel.changeContent(
-      //   <canvas id="chartContainer"></canvas>,
-      // );
-
-      const chart = new Chart(
-        document.getElementById('chartContainer') as HTMLCanvasElement,
-        config as any,
-      );
-
-      // const chartButtonPanel =
-      //   api.map(mapId).navBarButtons.buttons['charts']['chartModal'];
-
-      // const chartElement = document.getElementById('chartContainer');
-
-      // if (chartElement) {
-      //   chartElement.outerHTML = '<canvas id="chartContainer"></canvas>';
-      // }
-
-      // chartButtonPanel.panel.changeContent(
-      //   <canvas id="chartContainer"></canvas>,
-      // );
-
-      // const chart = new Chart(
-      //   document.getElementById('chartContainer') as HTMLCanvasElement,
-      //   config as any,
-      // );
-
-      // chartButtonPanel.panel.open();
     }
   };
 
   /**
-   * Search if marker already exists on map
+   * Get the variables for the dataset
    *
-   * @param {number} lat the latitude point
-   * @param {number} lng the longtitude point
+   * @param {string} dataset the selected dataset
    */
-  const searchMarkers = (lat: number, lng: number) => {
-    let markers = api.map(mapId).layer.vector.geometries;
+  const getVariableByDataset = async (dataset: string) => {
+    let res = (await API.getDatasetVariables(dataset, apiKey)) as any;
 
-    for (let i = 0; i < markers.length; i++) {
-      const markerPoint = markers[i]._latlng;
+    if (res.variables && res.variables.length > 0) {
+      cgpv.api.map('mapWM').modal.modals['chartContainerModal'].update({
+        content: '',
+        header: {
+          title: dataset,
+        },
+      });
 
-      if (markerPoint.lat === lat && markerPoint.lng === lng) {
-        return true;
-      }
+      setDataset(dataset);
+      setVariables(res.variables);
+      setVariable(res.variables[0]);
+
+      getDateRange();
     }
+  };
 
-    return false;
+  const mapClick = (e: any) => {
+    const point = e.coordinate;
+
+    const coordinate = api.projection.transformPoints(
+      e.coordinate,
+      'EPSG:3857',
+      'EPSG:4326',
+    )[0] as number[];
+
+    // get time series at the click location and open a chart
+    getTimeSeries(coordinate[1], coordinate[0]);
+
+    api.map(mapId).layer.vector?.deleteGeometry('clickPosition');
+
+    api
+      .map(mapId)
+      .layer.vector?.addMarker([point[0], point[1]], {}, 'clickPosition');
   };
 
   useEffect(() => {
@@ -227,28 +250,27 @@ export const ClimateEngine = (): JSX.Element => {
     }
 
     // listen to map click events
-    map.on('click', (e: any) => {
-      const point = e.latlng;
-
-      // get time series at the click location and open a chart
-      getTimeSeries(point.lat, point.lng);
-
-      let exists = searchMarkers(point.lat, point.lng);
-
-      if (!exists)
-        api.map(mapId).layer.vector.addMarker(point.lat, point.lng, {});
-    });
+    map.on('click', mapClick);
 
     return () => {
-      map.off('click');
+      map.un('click', mapClick);
     };
-  }, [startDate, endDate, loaded]);
+  }, [startDate, endDate, loaded, variable]);
 
   useEffect(() => {
+    const panelContainerQuery =
+      document.getElementsByClassName('MuiPaper-root');
+
+    if (panelContainerQuery && panelContainerQuery.length > 0) {
+      const panelContainer = panelContainerQuery[0] as HTMLElement;
+
+      panelContainer.style.width = 410 + 'px';
+    }
+
     createProcessProgressModal();
     createChartModal();
 
-    getDateRange();
+    getVariableByDataset(dataset);
 
     // add a loading indicator to map
     api
@@ -272,32 +294,8 @@ export const ClimateEngine = (): JSX.Element => {
    * Create a chart modal
    */
   const createChartModal = () => {
-    const modalId = 'chartModal';
-
-    // button props
-    const button = {
-      id: modalId,
-      tooltip: 'chart',
-      tooltipPlacement: 'left',
-      icon: '<i class="material-icons">map</i>',
-      visible: false,
-      type: 'icon',
-    };
-
-    // panel props
-    const panel = {
-      title: 'chart',
-      icon: '<i class="material-icons">map</i>',
-      width: 500,
-    };
-
-    // create a new button panel on the appbar
-    cgpv.api
-      .map('mapWM')
-      .navBarButtons.createNavbarButtonPanel(button, panel, 'charts');
-
     cgpv.api.map('mapWM').modal.createModal({
-      id: 'chartContainer',
+      id: 'chartContainerModal',
       content: <canvas id="chartContainer"></canvas>,
       width: 750,
       header: {
@@ -326,28 +324,92 @@ export const ClimateEngine = (): JSX.Element => {
             <div>
               <div className={classes.fieldSetField}>
                 <label htmlFor="dataset">Dataset:</label>
-                <Select id="dataset" value={dataset} disabled>
-                  <MenuItem value="LANDSAT8_SR">LANDSAT8_SR</MenuItem>
-                </Select>
+                <Select
+                  id="dataset"
+                  value={dataset}
+                  onChange={(e: any) => getVariableByDataset(e.target.value)}
+                  inputLabel={{
+                    id: 'select-dataset',
+                  }}
+                  menuItems={[
+                    {
+                      type: 'header',
+                      item: {
+                        children: 'Landsat At-Surface Reflectance',
+                      },
+                    },
+                    {
+                      item: {
+                        value: 'LANDSAT7_SR',
+                        children: 'Landsat 7 Surface Reflectance',
+                      },
+                    },
+                    {
+                      item: {
+                        value: 'LANDSAT8_SR',
+                        children: 'Landsat 8 Surface Reflectance',
+                      },
+                    },
+                    {
+                      type: 'header',
+                      item: {
+                        children: 'Landsat Top-Of-Atmosphere Reflectance',
+                      },
+                    },
+                    {
+                      item: {
+                        value: 'LANDSAT7_TOA',
+                        children: 'Landsat 7 TOA Reflectance',
+                      },
+                    },
+                    {
+                      item: {
+                        value: 'LANDSAT8_TOA',
+                        children: 'Landsat 8 TOA Reflectance',
+                      },
+                    },
+                  ]}
+                />
               </div>
               <div className={classes.fieldSetField}>
                 <label htmlFor="variable">Variable:</label>
-                <Select id="variable" value={variable} disabled>
-                  <MenuItem value="NDVI">NDVI</MenuItem>
-                </Select>
+                <Select
+                  id="variable"
+                  value={variable}
+                  onChange={(e: any) => setVariable(e.target.value)}
+                  inputLabel={{
+                    id: 'select-variable',
+                  }}
+                  menuItems={variables.map((item: string) => {
+                    return {
+                      key: item,
+                      item: {
+                        value: item,
+                        children: item,
+                      },
+                    };
+                  })}
+                />
               </div>
             </div>
           </fieldset>
           <fieldset className={classes.fieldSetContainer}>
             <legend>Time Period</legend>
             <div>
+              <div>
+                Range: {minDate} to {maxDate}
+              </div>
               <div className={classes.fieldSetField}>
                 <label htmlFor="startDate">Start Date:</label>
                 <TextField
                   id="startDate"
                   type="date"
                   value={startDate}
-                  inputProps={{ min: minDate, max: maxDate }}
+                  inputProps={{
+                    min: minDate,
+                    max: maxDate,
+                    style: { color: '#fff' },
+                  }}
                   onChange={(e: any) => setStartDate(e.target.value)}
                 />
               </div>
@@ -357,7 +419,11 @@ export const ClimateEngine = (): JSX.Element => {
                   id="endDate"
                   type="date"
                   value={endDate}
-                  inputProps={{ min: minDate, max: maxDate }}
+                  inputProps={{
+                    min: minDate,
+                    max: maxDate,
+                    style: { color: '#fff' },
+                  }}
                   onChange={(e: any) => setEndDate(e.target.value)}
                 />
               </div>

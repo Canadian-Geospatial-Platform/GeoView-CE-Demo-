@@ -1,7 +1,9 @@
 import { Login } from './Login';
 import { ClimateEngine } from './ClimateEngine';
 
-const w = window as any;
+import { TypeButtonPanel, TypeWindow } from 'geoview-core-types';
+
+const w = window as TypeWindow;
 
 const cgpv = w['cgpv'];
 
@@ -9,31 +11,58 @@ const { react } = cgpv;
 
 const { createContext } = react;
 
+export interface TypeAuth {
+  apiKey: string;
+  setApiKey: (apiKey: string) => void;
+  saveApiKey: (apiKey: string) => void;
+  getApiKey: () => void;
+  deleteApiKey: () => void;
+}
+
+export interface TypeStateContext {
+  auth: TypeAuth;
+  mapId: string;
+  buttonPanel: TypeButtonPanel;
+}
+
 // context used to store and manage state
-export const StateContext = createContext({});
+export const StateContext = createContext<TypeStateContext>({
+  auth: {
+    apiKey: '',
+    setApiKey: (key: string) => {},
+    saveApiKey: (key: string) => {},
+    getApiKey: () => {},
+    deleteApiKey: () => {},
+  },
+  mapId: '',
+  buttonPanel: {
+    id: '',
+    button: {},
+  },
+});
 
 /**
  * Panel Content Properties
  */
-interface PanelContentProps {
+interface CEPanelContentProps {
   mapId: string;
-  buttonPanel: any;
+  buttonPanel: TypeButtonPanel;
 }
 
 /**
  * Create a new panel content
  *
- * @param {PanelContentProps} props panel content properties
+ * @param {CEPanelContentProps} props panel content properties
  * @returns {JSX.Element} the new create panel content
  */
-export const PanelContent = (props: PanelContentProps): JSX.Element => {
+export const CEPanelContent = (props: CEPanelContentProps): JSX.Element => {
   const { buttonPanel, mapId } = props;
 
-  const { ui, mui, react } = cgpv;
+  const { ui, react } = cgpv;
 
   const { useState, useEffect, useMemo } = react;
 
-  const [apiKey, setApiKey] = useState();
+  const [apiKey, setApiKey] = useState<string>('');
 
   /**
    * Save API key in local storage and login user
@@ -63,7 +92,7 @@ export const PanelContent = (props: PanelContentProps): JSX.Element => {
   const deleteApiKey = (): void => {
     localStorage.removeItem('key');
 
-    auth.setApiKey(null);
+    auth.setApiKey('');
   };
 
   useEffect(() => {
@@ -73,7 +102,7 @@ export const PanelContent = (props: PanelContentProps): JSX.Element => {
   /**
    * Create auth state
    */
-  const auth = useMemo(() => {
+  const auth = useMemo((): TypeAuth => {
     return { apiKey, setApiKey, saveApiKey, deleteApiKey, getApiKey };
   }, [apiKey]);
 

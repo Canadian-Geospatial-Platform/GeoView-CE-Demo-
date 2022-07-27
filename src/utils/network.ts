@@ -1,4 +1,4 @@
-export const API_URL = 'https://geodata.dri.edu';
+export const API_URL = 'http://34.95.10.253:3000';
 
 /**
  * Make a get request on an endpoint
@@ -9,15 +9,20 @@ export const API_URL = 'https://geodata.dri.edu';
  */
 export const httpGet = async (
   endPoint: string,
-  token: string,
+  token?: string,
 ): Promise<any> => {
   try {
+    let headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = token;
+    }
+
     const res = await fetch(API_URL + endPoint, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
+      headers,
     });
 
     const result = await res.json();
@@ -38,15 +43,20 @@ export const httpGet = async (
 export const httpPost = async (
   endPoint: string,
   data: Record<string, any>,
-  token: string,
+  token?: string,
 ): Promise<any> => {
   try {
+    let headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = token;
+    }
+
     const res = await fetch(API_URL + endPoint, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
+      method: 'POST',
+      headers,
       body: JSON.stringify(data),
     });
 

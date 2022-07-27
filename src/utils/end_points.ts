@@ -5,7 +5,7 @@ export enum End_Points {
   /**
    * Verify if the provided token is valid
    */
-  VALIDATE_KEY = '/home/validate_key',
+  VALIDATE_KEY = '/validate_key',
   /**
    * Request map layers from a time period
    */
@@ -18,4 +18,8 @@ export enum End_Points {
    * Get min and max time period
    */
   DATASET_DATES = '/metadata/dataset_dates',
+  /**
+   * Get dataset variables
+   */
+  DATASET_VARIABLES = '/metadata/dataset_variables',
 }

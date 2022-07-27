@@ -1,6 +1,6 @@
 import { End_Points } from './end_points';
 
-import { httpGet } from './network';
+import { httpGet, httpPost } from './network';
 
 /**
  * Class contains API function for the CE
@@ -13,7 +13,9 @@ export class API {
    * @returns {Object} an object containing with success/fail message
    */
   static validateToken = async (token: string): Promise<Object> => {
-    const result = await httpGet(End_Points.VALIDATE_KEY, token);
+    const result = await httpPost(End_Points.VALIDATE_KEY, {
+      token,
+    });
 
     return result;
   };
@@ -32,6 +34,26 @@ export class API {
   ): Promise<Object> => {
     const result = await httpGet(
       `${End_Points.DATASET_DATES}?dataset=${dataset}`,
+      apiKey,
+    );
+
+    return result;
+  };
+
+  /**
+   * Get the available dataset variables
+   *
+   * @param {string} dataset the dataset to look for
+   * @param {string} apiKey Authentication token
+   *
+   * @returns {Object} An object containing the dataset variables
+   */
+  static getDatasetVariables = async (
+    dataset: string,
+    apiKey: string,
+  ): Promise<Object> => {
+    const result = await httpGet(
+      `${End_Points.DATASET_VARIABLES}?dataset=${dataset}`,
       apiKey,
     );
 

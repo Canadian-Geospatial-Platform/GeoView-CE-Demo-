@@ -1,6 +1,6 @@
 {
   "name": "geoview-ce-demo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A project that uses GeoView to showcase the use of Climate Engine",
   "main": "src/index.tsx",
   "private": true,
@@ -17,6 +17,7 @@
   "dependencies": {
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
+    "@google/earthengine": "^0.1.0",
     "@mui/icons-material": "^5.5.0",
     "@mui/material": "^5.5.0",
     "@mui/styles": "^5.5.0",
@@ -36,9 +37,11 @@
     "copy-webpack-plugin": "^10.2.4",
     "css-loader": "^6.6.0",
     "file-loader": "^6.2.0",
+    "geoview-core-types": "github:Canadian-Geospatial-Platform/GeoView#types",
     "gh-pages": "^3.2.3",
     "html-webpack-plugin": "^5.5.0",
     "path": "^0.12.7",
+    "prettier": "^2.6.2",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.2.6",
     "typescript": "^4.5.5",

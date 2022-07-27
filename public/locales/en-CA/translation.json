@@ -1,5 +1,6 @@
 {
   "custom": {
-    "panelTitle": "Climate Engine"
+    "cePanelTitle": "Climate Engine",
+    "geePanelTitle": "Google Earth Engine"
   }
 }

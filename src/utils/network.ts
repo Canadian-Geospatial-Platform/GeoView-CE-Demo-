@@ -1,4 +1,4 @@
-export const API_URL = 'http://34.95.10.253:3000';
+export const API_URL = 'https://34.95.10.253:3001';
 
 /**
  * Make a get request on an endpoint

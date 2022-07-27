@@ -128,7 +128,7 @@ export const ClimateEngine = (): JSX.Element => {
    * @param {number} lng longtitude value
    */
   const getTimeSeries = async (lat: number, lng: number) => {
-    const result = await API.getTimeSeries(
+    const result = (await API.getTimeSeries(
       lat,
       lng,
       dataset,
@@ -136,63 +136,65 @@ export const ClimateEngine = (): JSX.Element => {
       startDate,
       endDate,
       apiKey,
-    );
+    )) as any;
 
-    if (!Array.isArray(result)) {
-      api.event.emit(
-        types.snackbarMessagePayload(
-          api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
-          mapId,
-          {
-            type: 'key',
-            value: 'No points found',
-            params: [],
-          },
-        ),
-      );
-    } else {
-      let labels: string[] = [];
-      let data: number[] = [];
+    if (!result.details) {
+      if (!Array.isArray(result)) {
+        api.event.emit(
+          types.snackbarMessagePayload(
+            api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
+            mapId,
+            {
+              type: 'key',
+              value: 'No points found',
+              params: [],
+            },
+          ),
+        );
+      } else {
+        let labels: string[] = [];
+        let data: number[] = [];
 
-      for (var i = 0; i < result[0].length; i++) {
-        let value = result[0][i][variable];
+        for (var i = 0; i < result[0].length; i++) {
+          let value = result[0][i][variable];
 
-        if (value === -9999) value = 0;
+          if (value === -9999) value = 0;
 
-        labels.push(result[0][i].Date);
-        data.push(value);
+          labels.push(result[0][i].Date);
+          data.push(value);
+        }
+
+        const chartData = {
+          labels: labels,
+          datasets: [
+            {
+              label: variable,
+              backgroundColor: 'rgb(255, 99, 132)',
+              borderColor: 'rgb(255, 99, 132)',
+              data,
+            },
+          ],
+        };
+
+        const config = {
+          type: 'line',
+          data: chartData,
+          options: {},
+        };
+
+        api.map(mapId).modal.modals['chartContainerModal'].open();
+
+        const chartElement = document.getElementById('chartContainer');
+
+        if (chartElement) {
+          chartElement.outerHTML = '<canvas id="chartContainer"></canvas>';
+        }
+
+        const chart = new Chart(
+          document.getElementById('chartContainer') as HTMLCanvasElement,
+          config as any,
+        );
       }
-
-      const chartData = {
-        labels: labels,
-        datasets: [
-          {
-            label: variable,
-            backgroundColor: 'rgb(255, 99, 132)',
-            borderColor: 'rgb(255, 99, 132)',
-            data,
-          },
-        ],
-      };
-
-      const config = {
-        type: 'line',
-        data: chartData,
-        options: {},
-      };
-
-      api.map(mapId).modal.modals['chartContainerModal'].open();
-
-      const chartElement = document.getElementById('chartContainer');
-
-      if (chartElement) {
-        chartElement.outerHTML = '<canvas id="chartContainer"></canvas>';
-      }
-
-      const chart = new Chart(
-        document.getElementById('chartContainer') as HTMLCanvasElement,
-        config as any,
-      );
     }
   };
 

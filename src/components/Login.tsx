@@ -18,7 +18,8 @@ const useStyles = makeStyles((theme: any) => ({
   },
   loginTextInput: {
     width: '100%',
-    marginBottom: 10,
+    marginBottom: 30,
+    '& div': { backgroundColor: 'white', }
   },
   loginBtn: {},
   loginBtnText: {

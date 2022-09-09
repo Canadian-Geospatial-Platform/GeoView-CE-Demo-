@@ -79,13 +79,14 @@ export const ClimateEngine = (): JSX.Element => {
       if (loadedLayer) api.map(mapId).layer.removeLayerById(loadedLayer);
 
       // add the new layer
-      const layerId = api.map(mapId).layer.addLayer({
-        layerType: 'xyzTiles',
-        url: {
-          en: basemapUrl,
-          fr: basemapUrl,
-        },
-      });
+      const config: any = {
+        'geoviewLayerType': 'xyzTiles',
+        'initialSettings': { 'visible': true },
+        'listOfLayerEntryConfig': [
+          { 'layerId': 'toner', 'source': { 'dataAccessPath': { 'en': basemapUrl } } }
+        ]
+      };
+      const layerId = api.map(mapId).layer.addLayer(config);
 
       setLoadedLayer(layerId);
 
@@ -242,12 +243,13 @@ export const ClimateEngine = (): JSX.Element => {
   };
 
   useEffect(() => {
-    if (startDate.length && endDate.length && !loaded) {
-      setLoaded(true);
-      api.map(mapId).removeComponent('loadingIndicator');
+    // TODO: Do not load automatically
+    // if (startDate.length && endDate.length && !loaded) {
+    //   setLoaded(true);
+    //   api.map(mapId).removeComponent('loadingIndicator');
 
-      loadMapLayer();
-    }
+    //   loadMapLayer();
+    // }
 
     // listen to map click events
     map.on('click', mapClick);
@@ -272,10 +274,12 @@ export const ClimateEngine = (): JSX.Element => {
 
     getVariableByDataset(dataset);
 
-    // add a loading indicator to map
-    api
-      .map(mapId)
-      .addComponent('loadingIndicator', <CircularProgress isLoaded={loaded} />);
+    // By pass the hidden form and first load
+    setLoaded(true)
+    // TODO: make it work = add a loading indicator to map
+    // api
+    //   .map(mapId)
+    //   .addComponent('loadingIndicator', <CircularProgress isLoaded={loaded} />);
   }, []);
 
   /**
@@ -408,7 +412,7 @@ export const ClimateEngine = (): JSX.Element => {
                   inputProps={{
                     min: minDate,
                     max: maxDate,
-                    style: { color: '#fff' },
+                    style: { backgroundColor: '#fff' },
                   }}
                   onChange={(e: any) => setStartDate(e.target.value)}
                 />
@@ -422,7 +426,7 @@ export const ClimateEngine = (): JSX.Element => {
                   inputProps={{
                     min: minDate,
                     max: maxDate,
-                    style: { color: '#fff' },
+                    style: { backgroundColor: '#fff' },
                   }}
                   onChange={(e: any) => setEndDate(e.target.value)}
                 />

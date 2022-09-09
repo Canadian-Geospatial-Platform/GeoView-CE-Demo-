@@ -71,7 +71,8 @@ const App = (): JSX.Element => {
       );
 
       // get language
-      const { language }: { language: 'en-CA' | 'fr-CA' } = mapInstance;
+      //  const { language }: { language: 'en-CA' | 'fr-CA' } = mapInstance;
+      const language = 'en-CA';
 
       const MapIcon = cgpv.ui.elements.MapIcon;
 
@@ -141,11 +142,11 @@ const App = (): JSX.Element => {
         height: '100vh',
         zIndex: 0,
       }}
-      data-lang="en-CA"
+      data-lang="en"
       data-config="{
         'map': {
           'interaction': 'dynamic',
-          'view': {
+          'viewSettings': {
             'zoom': 4,
             'center': [-100, 60],
             'projection': 3857
@@ -154,11 +155,10 @@ const App = (): JSX.Element => {
             'id': 'transport',
             'shaded': false,
             'labeled': true
-          },
-          'layers': []
+          }
         },
         'theme': 'dark',
-        'languages': ['en-CA']
+        'suportedLanguages': ['en-CA', 'fr-CA']
         }"
     ></div>
   );

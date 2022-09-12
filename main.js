@@ -5027,7 +5027,8 @@ var End_Points;
     /**
      * Verify if the provided token is valid
      */
-    End_Points["VALIDATE_KEY"] = "/validate_key";
+    // VALIDATE_KEY = '/validate_key',
+    End_Points["VALIDATE_KEY"] = "/home/validate_key";
     /**
      * Request map layers from a time period
      */
@@ -5083,9 +5084,9 @@ var __generator = (undefined && undefined.__generator) || function (thisArg, bod
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var API_URL = 'http://34.95.10.253:3000';
+// export const API_URL = 'http://34.95.10.253:3000'; // Not for gh-pages as it is not https
 // export const API_URL = 'https://34.95.10.253:3001'; // ERR_CERT_AUTHORITY_INVALID
-// export const API_URL = 'https://geodata.dri.edu'; Public API - Try not to use
+var API_URL = 'https://geodata.dri.edu'; // Public API - Try not to use
 /**
  * Make a get request on an endpoint
  *
@@ -5217,11 +5218,13 @@ var API = /** @class */ (function () {
         var result;
         return api_generator(_a, function (_b) {
             switch (_b.label) {
-                case 0: return [4 /*yield*/, httpPost(End_Points.VALIDATE_KEY, {
-                        token: token,
-                    })];
+                case 0: return [4 /*yield*/, httpGet(End_Points.VALIDATE_KEY, token)];
                 case 1:
                     result = _b.sent();
+                    // TODO: before public
+                    // const result = await httpGet(End_Points.VALIDATE_KEY, {
+                    //   token,
+                    // });
                     return [2 /*return*/, result];
             }
         });

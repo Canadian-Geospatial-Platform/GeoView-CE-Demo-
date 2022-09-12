@@ -1,6 +1,7 @@
-export const API_URL = 'http://34.95.10.253:3000';
+// export const API_URL = 'http://34.95.10.253:3000'; // Not for gh-pages as it is not https
 // export const API_URL = 'https://34.95.10.253:3001'; // ERR_CERT_AUTHORITY_INVALID
-// export const API_URL = 'https://geodata.dri.edu'; Public API - Try not to use
+export const API_URL = 'https://geodata.dri.edu'; // Public API - Try not to use
+
 /**
  * Make a get request on an endpoint
  *

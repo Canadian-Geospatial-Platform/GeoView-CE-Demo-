@@ -5,7 +5,8 @@ export enum End_Points {
   /**
    * Verify if the provided token is valid
    */
-  VALIDATE_KEY = '/validate_key',
+  // VALIDATE_KEY = '/validate_key',
+  VALIDATE_KEY = '/home/validate_key', // TODO: public API
   /**
    * Request map layers from a time period
    */

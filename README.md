@@ -2,7 +2,7 @@
 
 This project is an example demo that shows how you can use Climate Engine in GeoView
 
-[Demo](https://canadian-geospatial-platform.github.io/GeoView-CE-Demo/)
+[Demo](https://canadian-geospatial-platform.github.io/geoview-ce-demo/)
 
 ```html
 The viewer is being loaded in public/index.html as a script tag
@@ -15,7 +15,7 @@ The viewer is being loaded in public/index.html as a script tag
 ### First clone this repo
 
 ```
-$ git clone https://github.com/Canadian-Geospatial-Platform/GeoView-CE-Demo.git
+$ git clone https://github.com/Canadian-Geospatial-Platform/geoview-ce-demo.git
 ```
 
 ### Go to the directory of the cloned repo

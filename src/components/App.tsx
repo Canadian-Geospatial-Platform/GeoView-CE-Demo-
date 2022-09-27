@@ -6,8 +6,8 @@ import makeStyles from '@mui/styles/makeStyles';
 import { CEPanelContent } from './CEPanelContent';
 // import { GEEPanelContent } from './GEEPanelContent';
 
-import translationEn from '../../public/locales/en-CA/translation.json';
-import translationFr from '../../public/locales/fr-CA/translation.json';
+import translationEn from '../../public/locales/en/translation.json';
+import translationFr from '../../public/locales/fr/translation.json';
 
 import {
   TypeIconButtonProps,
@@ -47,8 +47,8 @@ const App = (): JSX.Element => {
        * translations object to inject to the viewer translations
        */
       const translations = {
-        'en-CA': translationEn,
-        'fr-CA': translationFr,
+        'en': translationEn,
+        'fr': translationFr,
       };
 
       // get map instance
@@ -56,23 +56,23 @@ const App = (): JSX.Element => {
 
       // add custom languages
       mapInstance.i18nInstance.addResourceBundle(
-        'en-CA',
+        'en',
         'translation',
-        translations['en-CA'],
+        translations['en'],
         true,
         false,
       );
       mapInstance.i18nInstance.addResourceBundle(
-        'fr-CA',
+        'fr',
         'translation',
-        translations['fr-CA'],
+        translations['fr'],
         true,
         false,
       );
 
       // get language
       //  const { language }: { language: 'en-CA' | 'fr-CA' } = mapInstance;
-      const language = 'en-CA';
+      const language = 'en';
 
       const MapIcon = cgpv.ui.elements.MapIcon;
 
@@ -158,7 +158,7 @@ const App = (): JSX.Element => {
           }
         },
         'theme': 'dark',
-        'suportedLanguages': ['en-CA', 'fr-CA']
+        'suportedLanguages': ['en', 'fr']
         }"
     ></div>
   );
